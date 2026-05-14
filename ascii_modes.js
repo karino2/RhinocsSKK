@@ -1,0 +1,45 @@
+(function() {
+function createAsciiLikeMode(conv) {
+  return function(skk, keyStr) {
+    if (keyStr == 'C-j') {
+      skk.switchMode('hiragana');
+      return true;
+    }
+
+    if (keyStr == 'Return') {
+      skk.commitText('\n');
+      return true;
+    }
+
+    if (keyStr.length > 1) {
+      return false;
+    }
+
+    return conv(skk, keyStr);
+  };
+}
+
+SKK.registerMode('ascii', {
+  displayName: '\u82f1\u6570',
+  keyHandler: createAsciiLikeMode(function(skk, keyStr) {
+    return false;
+  })
+});
+
+SKK.registerMode('full-ascii', {
+  displayName: '\u5168\u82f1',
+  keyHandler: createAsciiLikeMode(function(skk, keyStr) {
+    var c = keyStr.charCodeAt(0);
+    if (c >= 0x20 && c < 0x7f) {
+      if (c == 0x20) {
+        c = 0x3000; // IDEOGRAPHIC SPACE
+      } else {
+        c += 0xfee0;
+      }
+      skk.commitText(String.fromCharCode(c));
+      return true;
+    }
+    return false;
+  })
+});
+})();

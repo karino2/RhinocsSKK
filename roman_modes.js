@@ -49,11 +49,16 @@ function createRomanInput(table) {
         (skk.currentMode == 'hiragana') ? 'katakana' : 'hiragana');
       return true;
     }
-    /*
     if (keyStr == 'l') {
       skk.switchMode('ascii');
       return true;
     }
+    if (keyStr == 'L') {
+      skk.processRoman(keyStr, table, skk.commitText.bind(skk));
+      skk.switchMode('full-ascii');
+      return true;
+    }
+    /*
 
     if (keyStr == '/') {
       skk.switchMode('ascii-preedit');
