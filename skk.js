@@ -11,6 +11,7 @@ function SKK(dictionary) {
   this.dictionary = dictionary;
   this.timeout = null;
   this.private = false;
+  this.conversionRegion = null;
 }
 
 SKK.prototype.commitText = function(text) {
@@ -18,10 +19,26 @@ SKK.prototype.commitText = function(text) {
 };
 SKK.prototype.setComposition = function(text, cursor, args) {
     print("setComposition: text:" + text + " cursor:" + cursor);
+
+    if (this.conversionRegion) {
+        let [start, end] = this.conversionRegion;
+        delete_region(start, end);
+    } else {
+        this.conversionRegion = [point(), point()];
+    }
+    insert(text);
+    this.conversionRegion[1] = this.conversionRegion[0] + text.length;
+
 };
 SKK.prototype.clearComposition = function() {
     print("clearing composition");
+    if (this.conversionRegion) {
+        let [start, end] = this.conversionRegion;
+        delete_region(start, end);
+    }
+    this.conversionRegion = null;
 };
+
 SKK.prototype.updateCandidates = function() {
     print("update candidates");
 }
