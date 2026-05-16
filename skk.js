@@ -279,6 +279,11 @@ SKK.prototype.showStatus = function() {
 let g_skk = new SKK(new Dictionary());
 
 function onKeyDown(keyStr) {
+    // C-x C-sとかの2ストロークものは今の所skk.jsでは使ってないので、キー待ちはデフォルトの方に流す。C-x C-jで実行するようにそのうち直したい。
+    if(lastKeySequence.length > 0) {
+        defaultOnKeyDown(keyStr);
+        return;
+    }
     print("mode:" + g_skk.currentMode + " roman: " + g_skk.roman);
     if(!g_skk.handleKeyEvent(keyStr)) {
         defaultOnKeyDown(keyStr);

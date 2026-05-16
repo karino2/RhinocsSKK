@@ -79,8 +79,14 @@ Dictionary.prototype.log = function(obj) {
 
 Dictionary.prototype.doUpdate = function() {
   var self = this;
-  let content = read_file("SKK-JISYO.S");
-  var systemDict = self.parseData(content);
+  // let content = read_file("SKK-JISYO.S");
+  /*
+    自分の端末では6秒以上かかるので、Kotlinで書き直した。
+    kotlinだと2.6secくらい。
+  */
+  // let content = read_gzip_file("SKK-JISYO.L.gz");
+  // var systemDict = self.parseData(content);
+  var systemDict = load_gzip_skk_dictionary("SKK-JISYO.L.gz");
   self.systemDict = systemDict;
   self.log({'status':'parsed'});
 };
