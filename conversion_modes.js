@@ -1,0 +1,115 @@
+(function() {
+
+function updateComposition(skk) {
+  var entry = skk.entries.entries[skk.entries.index];
+  if (!entry) {
+    skk.clearComposition();
+  }
+
+  var preedit = '\u25bc' + entry.word;
+  if (skk.okuriText.length > 0) {
+    preedit += skk.okuriText;
+  }
+  if (entry.annotation) {
+    preedit += ';' + entry.annotation;
+  }
+  skk.setComposition(preedit, 1, {selectionStart:preedit.length,
+                                  selectionEnd:preedit.length});
+}
+
+function initConversion(skk) {
+  let hint = '';
+  const semicolon = skk.preedit.indexOf(';');
+  if (semicolon > 0) {
+    hint = skk.preedit.slice(semicolon + 1);
+    skk.preedit = skk.preedit.slice(0, semicolon);
+  }
+  skk.lookup(skk.preedit + skk.okuriPrefix, function(entries) {
+    if (entries) {
+      skk.entries = {
+        index:0,
+        entries:hint ? skk.narrowDown(entries, hint) : entries,
+        label:'asdfjkl'
+      };
+      updateComposition(skk);
+    } else {
+      skk.createInnerSKK();
+    }
+  });
+}
+
+function conversionMode(skk, keyStr) {
+  if (keyStr == 'Space') {
+    if (skk.entries.index > 2) {
+      skk.entries.index += 7;
+    } else {
+      skk.entries.index++;
+    }
+
+    if (skk.entries.index >= skk.entries.entries.length) {
+      skk.createInnerSKK();
+    }
+  } else if (keyStr == 'x') {
+    if (skk.entries.index > 9) {
+      skk.entries.index -= 7;
+    } else {
+      skk.entries.index--;
+    }
+    if (skk.entries.index < 0) {
+      skk.entries = null;
+      skk.preedit += skk.okuriText;
+      skk.okuriText = '';
+      skk.okuriPrefix = '';
+      skk.switchMode('preedit');
+    }
+  } else if (keyStr == 'Escape' ||
+             keyStr == 'C-g') {
+    skk.entries = null;
+    skk.preedit += skk.okuriText;
+    skk.okuriText = '';
+    skk.okuriPrefix = '';
+    skk.switchMode('preedit');
+  } else if (keyStr == 'X') {
+    var entry = skk.entries.entries[skk.entries.index];
+    skk.dictionary.removeUserEntry(skk.preedit + skk.okuriPrefix, entry.word);
+    skk.entries = null;
+    skk.preedit += skk.okuriText;
+    skk.okuriText = '';
+    skk.okuriPrefix = '';
+    skk.switchMode('preedit');
+  } else {
+    var is_commit_key = (
+      keyStr == 'Enter' || keyStr == 'C-j');
+    if (skk.entries.index > 2 &&
+         'asdfjkl'.indexOf(keyStr) >= 0) {
+      skk.entries.index += 'asdfjkl'.indexOf(keyStr);
+      is_commit_key = true;
+    }
+    var entry = skk.entries.entries[skk.entries.index];
+    skk.commitText(entry.word + skk.okuriText);
+    skk.recordNewResult(entry);
+    skk.clearComposition();
+    skk.entries = null;
+    skk.okuriText = '';
+    skk.okuriPrefix = '';
+    if (keyStr == '>') {
+      skk.preedit = '>';
+      skk.switchMode('preedit');
+    } else {
+      skk.preedit = '';
+      skk.switchMode('hiragana');
+      if (!is_commit_key) {
+        return skk.handleKeyEvent(keyStr);
+      }
+    }
+  }
+
+  return true;
+}
+
+SKK.registerImplicitMode('conversion', {
+    keyHandler: conversionMode,
+    initHandler: initConversion,
+    compositionHandler: updateComposition
+});
+})();
