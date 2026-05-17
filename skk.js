@@ -280,7 +280,7 @@ let g_skk = new SKK(new Dictionary());
 
 function onKeyDown(keyStr) {
     // C-x C-sとかの2ストロークものは今の所skk.jsでは使ってないので、キー待ちはデフォルトの方に流す。C-x C-jで実行するようにそのうち直したい。
-    if(lastKeySequence.length > 0) {
+    if(keyMapHandler.isWaitingNextKey()) {
         defaultOnKeyDown(keyStr);
         return;
     }

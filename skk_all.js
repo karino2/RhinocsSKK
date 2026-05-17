@@ -1,4 +1,4 @@
-let g_timestamp = "2026-05-16 21:25";
+let g_timestamp = "2026-05-17 22:28";
 
 print("SKK: " + g_timestamp);
 
@@ -84,6 +84,10 @@ Dictionary.prototype.log = function(obj) {
 Dictionary.prototype.doUpdate = function() {
   var self = this;
   // let content = read_file("SKK-JISYO.S");
+  /*
+    自分の端末では6秒以上かかるので、Kotlinで書き直した。
+    kotlinだと2.6secくらい。
+  */
   // let content = read_gzip_file("SKK-JISYO.L.gz");
   // var systemDict = self.parseData(content);
   var systemDict = load_gzip_skk_dictionary("SKK-JISYO.L.gz");
@@ -469,7 +473,7 @@ let g_skk = new SKK(new Dictionary());
 
 function onKeyDown(keyStr) {
     // C-x C-sとかの2ストロークものは今の所skk.jsでは使ってないので、キー待ちはデフォルトの方に流す。C-x C-jで実行するようにそのうち直したい。
-    if(lastKeySequence.length > 0) {
+    if(keyMapHandler.isWaitingNextKey()) {
         defaultOnKeyDown(keyStr);
         return;
     }
