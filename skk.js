@@ -1,4 +1,11 @@
 function SKK(dictionary) {
+  this.dictionary = dictionary;
+  this.skkKeymap = null;
+  this.enableSKK = false;
+  this.initializeState();
+}
+
+SKK.prototype.initializeState = function() {
   this.context = null;
   this.currentMode = 'hiragana';
   this.previousMode = null;
@@ -8,11 +15,10 @@ function SKK(dictionary) {
   this.okuriText = '';
   this.caret = null;
   this.entries = null;
-  this.dictionary = dictionary;
   this.timeout = null;
   this.private = false;
   this.conversionRegion = null;
-}
+};
 
 SKK.prototype.commitText = function(text) {
   insert(text);
@@ -276,16 +282,76 @@ SKK.prototype.finishInner = function(successfully) {
 SKK.prototype.showStatus = function() {
 }
 
+
+/*
+  もともとkeyHandler的にかかれていたSKKをkeymapで動かすために作った関数。
+  self-insertのように$keyを使って動く。複数ストロークのものは今のところSKKには無いはずというコードになっている。
+  登録したキーマップからしか呼ばれないという前提、つまりこのキー自体は一旦SKKが受け取る前提。
+*/
+SKK.prototype.tryHandleKey = function() {
+  if(this.handleKeyEvent($key)){
+    return true
+  } else {
+    g_keyMapHandler.requestDelegateKeyHandle();
+    return false;
+  }
+}
+
+SKK.prototype.createSKKKeyMap = function() {
+  let skkKeyHandle = this.tryHandleKey.bind(this);
+  let keymap = new KeyMap();
+
+  let define = (key) => {
+    keymap.defineKey(key, skkKeyHandle);
+  };
+
+  /* 普通の文字はすべてハンドル */
+  let defSelfKeys = default_self_insert_keys();
+  defSelfKeys.forEach(k => define(k));
+
+  define("Space");
+  define("Backspace");
+  define("Delete");
+  define("Escape");
+  define("Left");
+  define("Return");
+  define("Right");
+  define("C-b");
+  define("C-c");
+  define("C-f");
+  define("C-g");
+  define("C-h");
+  define("C-j");
+  define("C-y");
+  define("C-d");
+
+  return keymap;
+}
+
+SKK.prototype.getKeyMap = function() {
+  if(!this.skkKeymap){
+    this.skkKeymap = this.createSKKKeyMap();
+  }
+  return this.skkKeymap;
+}
+
+SKK.prototype.finishSKK = function() {
+  this.enableSKK = false;
+  // とりあえずなんでもキャンセルを送って、
+  this.handleKeyEvent("C-g");
+  this.initializeState();
+}
+
 let g_skk = new SKK(new Dictionary());
 
-function onKeyDown(keyStr) {
-    // C-x C-sとかの2ストロークものは今の所skk.jsでは使ってないので、キー待ちはデフォルトの方に流す。C-x C-jで実行するようにそのうち直したい。
-    if(keyMapHandler.isWaitingNextKey()) {
-        defaultOnKeyDown(keyStr);
-        return;
-    }
-    print("mode:" + g_skk.currentMode + " roman: " + g_skk.roman);
-    if(!g_skk.handleKeyEvent(keyStr)) {
-        defaultOnKeyDown(keyStr);
-    }
-}
+global_set_key(["C-x", "C-j"], () => {
+  if (g_skk.enableSKK) {
+    g_skk.finishSKK();
+    g_keyMapHandler.popKeyMap();
+    print("disable SKK");
+  } else {
+    g_skk.enableSKK = true;
+    g_keyMapHandler.pushKeyMap(g_skk.getKeyMap());
+    print("enable SKK");
+  }
+});

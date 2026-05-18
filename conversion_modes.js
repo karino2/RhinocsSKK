@@ -79,7 +79,7 @@ function conversionMode(skk, keyStr) {
     skk.switchMode('preedit');
   } else {
     var is_commit_key = (
-      keyStr == 'Enter' || keyStr == 'C-j');
+      keyStr == 'Return' || keyStr == 'C-j');
     if (skk.entries.index > 2 &&
          'asdfjkl'.indexOf(keyStr) >= 0) {
       skk.entries.index += 'asdfjkl'.indexOf(keyStr);

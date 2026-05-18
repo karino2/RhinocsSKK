@@ -10,7 +10,7 @@ function updateComposition(skk) {
 
 function createRomanInput(table) {
   return function (skk, keyStr) {
-    if (keyStr == 'Enter') {
+    if (keyStr == 'Return') {
       if (skk.roman == 'n') {
         const table2 = (skk.currentMode == 'hiragana') ? romanTable : katakanaTable;
         skk.commitText(table2['nn']);
@@ -21,7 +21,7 @@ function createRomanInput(table) {
       return false;
     }
 
-    if (keyStr == 'Delete' && skk.roman.length > 0) {
+    if ((keyStr == 'Delete' || keyStr == "C-d") && skk.roman.length > 0) {
       skk.roman = skk.roman.slice(0, skk.roman.length - 1);
       return true;
     }

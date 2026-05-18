@@ -29,17 +29,20 @@ SKK.registerMode('ascii', {
 SKK.registerMode('full-ascii', {
   displayName: '\u5168\u82f1',
   keyHandler: createAsciiLikeMode(function(skk, keyStr) {
-    var c = keyStr.charCodeAt(0);
-    if (c >= 0x20 && c < 0x7f) {
-      if (c == 0x20) {
-        c = 0x3000; // IDEOGRAPHIC SPACE
-      } else {
-        c += 0xfee0;
-      }
-      skk.commitText(String.fromCharCode(c));
+    if (keyStr == "Space") {
+      skk.commitText(String.fromCharCode(0x3000)); // IDEOGRAPHIC SPACE
       return true;
     }
-    return false;
+    if (keyStr.length > 1) {
+      return false;
+    }
+    // 全角に
+    var c = keyStr.charCodeAt(0);
+    if (c > 0x20 && c < 0x7f) {
+        c += 0xfee0;
+      }
+    skk.commitText(String.fromCharCode(c));
+    return true;
   })
 });
 })();

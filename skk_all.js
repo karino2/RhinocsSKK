@@ -1,4 +1,4 @@
-let g_timestamp = "2026-05-17 22:28";
+let g_timestamp = "2026-05-18 10:26";
 
 print("SKK: " + g_timestamp);
 
@@ -192,6 +192,13 @@ Dictionary.prototype.removeUserEntry = function(reading, word) {
 })();
 
 function SKK(dictionary) {
+  this.dictionary = dictionary;
+  this.skkKeymap = null;
+  this.enableSKK = false;
+  this.initializeState();
+}
+
+SKK.prototype.initializeState = function() {
   this.context = null;
   this.currentMode = 'hiragana';
   this.previousMode = null;
@@ -201,11 +208,10 @@ function SKK(dictionary) {
   this.okuriText = '';
   this.caret = null;
   this.entries = null;
-  this.dictionary = dictionary;
   this.timeout = null;
   this.private = false;
   this.conversionRegion = null;
-}
+};
 
 SKK.prototype.commitText = function(text) {
   insert(text);
@@ -469,20 +475,79 @@ SKK.prototype.finishInner = function(successfully) {
 SKK.prototype.showStatus = function() {
 }
 
-let g_skk = new SKK(new Dictionary());
 
-function onKeyDown(keyStr) {
-    // C-x C-sとかの2ストロークものは今の所skk.jsでは使ってないので、キー待ちはデフォルトの方に流す。C-x C-jで実行するようにそのうち直したい。
-    if(keyMapHandler.isWaitingNextKey()) {
-        defaultOnKeyDown(keyStr);
-        return;
-    }
-    print("mode:" + g_skk.currentMode + " roman: " + g_skk.roman);
-    if(!g_skk.handleKeyEvent(keyStr)) {
-        defaultOnKeyDown(keyStr);
-    }
+/*
+  もともとkeyHandler的にかかれていたSKKをkeymapで動かすために作った関数。
+  self-insertのように$keyを使って動く。複数ストロークのものは今のところSKKには無いはずというコードになっている。
+  登録したキーマップからしか呼ばれないという前提、つまりこのキー自体は一旦SKKが受け取る前提。
+*/
+SKK.prototype.tryHandleKey = function() {
+  if(this.handleKeyEvent($key)){
+    return true
+  } else {
+    g_keyMapHandler.requestDelegateKeyHandle();
+    return false;
+  }
 }
 
+SKK.prototype.createSKKKeyMap = function() {
+  let skkKeyHandle = this.tryHandleKey.bind(this);
+  let keymap = new KeyMap();
+
+  let define = (key) => {
+    keymap.defineKey(key, skkKeyHandle);
+  };
+
+  /* 普通の文字はすべてハンドル */
+  let defSelfKeys = default_self_insert_keys();
+  defSelfKeys.forEach(k => define(k));
+
+  define("Space");
+  define("Backspace");
+  define("Delete");
+  define("Escape");
+  define("Left");
+  define("Return");
+  define("Right");
+  define("C-b");
+  define("C-c");
+  define("C-f");
+  define("C-g");
+  define("C-h");
+  define("C-j");
+  define("C-y");
+  define("C-d");
+
+  return keymap;
+}
+
+SKK.prototype.getKeyMap = function() {
+  if(!this.skkKeymap){
+    this.skkKeymap = this.createSKKKeyMap();
+  }
+  return this.skkKeymap;
+}
+
+SKK.prototype.finishSKK = function() {
+  this.enableSKK = false;
+  // とりあえずなんでもキャンセルを送って、
+  this.handleKeyEvent("C-g");
+  this.initializeState();
+}
+
+let g_skk = new SKK(new Dictionary());
+
+global_set_key(["C-x", "C-j"], () => {
+  if (g_skk.enableSKK) {
+    g_skk.finishSKK();
+    g_keyMapHandler.popKeyMap();
+    print("disable SKK");
+  } else {
+    g_skk.enableSKK = true;
+    g_keyMapHandler.pushKeyMap(g_skk.getKeyMap());
+    print("enable SKK");
+  }
+});
 var romanTable = {
   a:'\u3042', i:'\u3044', u:'\u3046', e:'\u3048', o:'\u304a',
   xa:'\u3041', xi:'\u3043', xu:'\u3045', xe:'\u3047', xo:'\u3049',
@@ -601,7 +666,7 @@ function updateComposition(skk) {
 
 function createRomanInput(table) {
   return function (skk, keyStr) {
-    if (keyStr == 'Enter') {
+    if (keyStr == 'Return') {
       if (skk.roman == 'n') {
         const table2 = (skk.currentMode == 'hiragana') ? romanTable : katakanaTable;
         skk.commitText(table2['nn']);
@@ -612,7 +677,7 @@ function createRomanInput(table) {
       return false;
     }
 
-    if (keyStr == 'Delete' && skk.roman.length > 0) {
+    if ((keyStr == 'Delete' || keyStr == "C-d") && skk.roman.length > 0) {
       skk.roman = skk.roman.slice(0, skk.roman.length - 1);
       return true;
     }
@@ -723,17 +788,20 @@ SKK.registerMode('ascii', {
 SKK.registerMode('full-ascii', {
   displayName: '\u5168\u82f1',
   keyHandler: createAsciiLikeMode(function(skk, keyStr) {
-    var c = keyStr.charCodeAt(0);
-    if (c >= 0x20 && c < 0x7f) {
-      if (c == 0x20) {
-        c = 0x3000; // IDEOGRAPHIC SPACE
-      } else {
-        c += 0xfee0;
-      }
-      skk.commitText(String.fromCharCode(c));
+    if (keyStr == "Space") {
+      skk.commitText(String.fromCharCode(0x3000)); // IDEOGRAPHIC SPACE
       return true;
     }
-    return false;
+    if (keyStr.length > 1) {
+      return false;
+    }
+    // 全角に
+    var c = keyStr.charCodeAt(0);
+    if (c > 0x20 && c < 0x7f) {
+        c += 0xfee0;
+      }
+    skk.commitText(String.fromCharCode(c));
+    return true;
   })
 });
 })();
@@ -1067,7 +1135,7 @@ function conversionMode(skk, keyStr) {
     skk.switchMode('preedit');
   } else {
     var is_commit_key = (
-      keyStr == 'Enter' || keyStr == 'C-j');
+      keyStr == 'Return' || keyStr == 'C-j');
     if (skk.entries.index > 2 &&
          'asdfjkl'.indexOf(keyStr) >= 0) {
       skk.entries.index += 'asdfjkl'.indexOf(keyStr);
