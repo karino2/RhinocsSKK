@@ -84,9 +84,9 @@ Dictionary.prototype.doUpdate = function() {
     自分の端末では6秒以上かかるので、Kotlinで書き直した。
     kotlinだと2.6secくらい。
   */
-  // let content = read_gzip_file("SKK-JISYO.L.gz");
+  // let content = read_gzip_file("/skk/SKK-JISYO.L.gz");
   // var systemDict = self.parseData(content);
-  var systemDict = load_gzip_skk_dictionary("SKK-JISYO.L.gz");
+  var systemDict = load_gzip_skk_dictionary("/skk/SKK-JISYO.L.gz");
   self.systemDict = systemDict;
   self.log({'status':'parsed'});
 };
