@@ -1,4 +1,4 @@
-let g_timestamp = "2026-05-18 10:26";
+let g_timestamp = "2026-05-18 22:24";
 
 print("SKK: " + g_timestamp);
 
@@ -214,17 +214,17 @@ SKK.prototype.initializeState = function() {
 };
 
 SKK.prototype.commitText = function(text) {
+  // print("commitText: text:" + text + " , creg:" + JSON.stringify(this.conversionRegion), " , point:" + point());
   insert(text);
 };
 SKK.prototype.setComposition = function(text, cursor, args) {
-    print("setComposition: text:" + text + " cursor:" + cursor);
+    print("setComposition: text:" + text + " cursor:" + cursor + ", creg:" + JSON.stringify(this.conversionRegion));
 
     if (this.conversionRegion) {
         let [start, end] = this.conversionRegion;
         delete_region(start, end);
-    } else {
-        this.conversionRegion = [point(), point()];
     }
+    this.conversionRegion = [point(), point()];
     insert(text);
     this.conversionRegion[1] = this.conversionRegion[0] + text.length;
 
