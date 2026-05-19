@@ -348,10 +348,10 @@ global_set_key(["C-x", "C-j"], () => {
   if (g_skk.enableSKK) {
     g_skk.finishSKK();
     g_keyMapHandler.popKeyMap();
-    print("disable SKK");
+    message("disable SKK");
   } else {
     g_skk.enableSKK = true;
     g_keyMapHandler.pushKeyMap(g_skk.getKeyMap());
-    print("enable SKK");
+    message("enable SKK");
   }
 });
