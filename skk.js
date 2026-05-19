@@ -47,6 +47,25 @@ SKK.prototype.clearComposition = function() {
 
 SKK.prototype.updateCandidates = function() {
     print("update candidates");
+    if (this.inner_skk) {
+      this.inner_skk.updateCandidates();
+      return;
+    }
+
+    if (!this.entries || this.entries.index <= 2) {
+      message("");
+    } else {
+      var candidates = [];
+      for (var i = 0; i < 7; i++) {
+        if (i + this.entries.index >= this.entries.entries.length) {
+          break;
+        }
+        var entry = this.entries.entries[this.entries.index + i];
+        candidates.push(`${"asdfjkl"[i]} ${entry.word}`);
+      }
+      message(candidates.join(" "));
+    }
+
 }
 
 SKK.prototype.lookup = function(reading, callback) {
