@@ -33,7 +33,7 @@ function initConversion(skk) {
       };
       updateComposition(skk);
     } else {
-      skk.createInnerSKK();
+      skk.queryUnknownWord();
     }
   });
 }
@@ -47,7 +47,7 @@ function conversionMode(skk, keyStr) {
     }
 
     if (skk.entries.index >= skk.entries.entries.length) {
-      skk.createInnerSKK();
+      skk.queryUnknownWord();
     }
   } else if (keyStr == 'x') {
     if (skk.entries.index > 9) {
