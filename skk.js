@@ -171,7 +171,9 @@ SKK.prototype.queryUnknownWord = function() {
   }
 
   let new_word = query_text_dialog(label);
+  print("new_word: " + new_word);
   if(new_word != "") {
+    print("not null");
     this.recordNewResult({word:new_word});
     this.commitText(new_word + this.okuriText);
     this.roman = '';
@@ -182,6 +184,7 @@ SKK.prototype.queryUnknownWord = function() {
     this.okuriPrefix = '';
     this.switchMode('hiragana');
   } else {
+    print("null case, prevMode:" + this.previousMode);
     this.roman = '';
     if (this.previousMode != 'conversion') {
       this.entries = null;

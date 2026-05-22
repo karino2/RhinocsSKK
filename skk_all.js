@@ -1,4 +1,4 @@
-let g_timestamp = "2026-05-21 23:37";
+let g_timestamp = "2026-05-22 00:37";
 
 print("SKK: " + g_timestamp);
 
@@ -101,7 +101,8 @@ Dictionary.prototype.reloadSystemDictionary = function() {
 
 Dictionary.prototype.syncUserDictionary = function() {
   var userDict = this.userDict;
-  // chrome.storage.local.set({ userDict });
+  let userDictPath = join_path(get_per_device_storage(), "/skk/userdict.json");
+  write_file(JSON.stringify(userDict), userDictPath);
 };
 
 Dictionary.prototype.initSystemDictionary = function() {
@@ -110,6 +111,11 @@ Dictionary.prototype.initSystemDictionary = function() {
 };
 
 Dictionary.prototype.initUserDictionary = function() {
+  let userDictPath = join_path(get_per_device_storage(), "/skk/userdict.json");
+  let content = read_file(userDictPath);
+  if (content) {
+    this.userDict = JSON.parse(content);
+  }
 };
 
 Dictionary.prototype.lookup = function(reading) {
@@ -364,7 +370,9 @@ SKK.prototype.queryUnknownWord = function() {
   }
 
   let new_word = query_text_dialog(label);
+  print("new_word: " + new_word);
   if(new_word != "") {
+    print("not null");
     this.recordNewResult({word:new_word});
     this.commitText(new_word + this.okuriText);
     this.roman = '';
@@ -375,6 +383,7 @@ SKK.prototype.queryUnknownWord = function() {
     this.okuriPrefix = '';
     this.switchMode('hiragana');
   } else {
+    print("null case, prevMode:" + this.previousMode);
     this.roman = '';
     if (this.previousMode != 'conversion') {
       this.entries = null;

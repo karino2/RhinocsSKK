@@ -97,7 +97,8 @@ Dictionary.prototype.reloadSystemDictionary = function() {
 
 Dictionary.prototype.syncUserDictionary = function() {
   var userDict = this.userDict;
-  // chrome.storage.local.set({ userDict });
+  let userDictPath = join_path(get_per_device_storage(), "/skk/userdict.json");
+  write_file(JSON.stringify(userDict), userDictPath);
 };
 
 Dictionary.prototype.initSystemDictionary = function() {
@@ -106,6 +107,11 @@ Dictionary.prototype.initSystemDictionary = function() {
 };
 
 Dictionary.prototype.initUserDictionary = function() {
+  let userDictPath = join_path(get_per_device_storage(), "/skk/userdict.json");
+  let content = read_file(userDictPath);
+  if (content) {
+    this.userDict = JSON.parse(content);
+  }
 };
 
 Dictionary.prototype.lookup = function(reading) {
