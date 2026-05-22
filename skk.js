@@ -2,6 +2,7 @@ function SKK(dictionary) {
   this.dictionary = dictionary;
   this.skkKeymap = null;
   this.enableSKK = false;
+  this.baseModeFmt = "";
   this.initializeState();
 }
 
@@ -120,13 +121,19 @@ SKK.prototype.processRoman = function (key, table, emitter) {
 
 SKK.prototype.modes = {};
 SKK.prototype.primaryModes = [];
-SKK.registerMode = function(modeName, mode) {
+SKK.prototype.modeNameMap = {};
+SKK.registerMode = function(modeName, dispName, mode) {
   SKK.registerImplicitMode(modeName, mode);
   SKK.prototype.primaryModes.push(modeName);
+  SKK.prototype.modeNameMap[modeName] = dispName;
 };
 SKK.registerImplicitMode = function(modeName, mode) {
   SKK.prototype.modes[modeName] = mode;
 };
+
+SKK.prototype.modeDispName = function() {
+  return this.modeNameMap[this.currentMode] || this.currentMode;
+}
 
 SKK.prototype.switchMode = function(newMode) {
   if (newMode == this.currentMode) {
@@ -140,6 +147,10 @@ SKK.prototype.switchMode = function(newMode) {
   var initHandler = this.modes[this.currentMode].initHandler;
   if (initHandler) {
     initHandler(this);
+  }
+
+  if (this.primaryModes.indexOf(newMode) >= 0) {
+    set_mode_line_format(`SKK-${this.modeDispName()}:  ${this.baseModeFmt}`)
   }
 };
 SKK.prototype.updateComposition = function() {
@@ -273,11 +284,12 @@ SKK.prototype.toggleEnableSKK = function() {
   if (this.enableSKK) {
     this.finishSKK();
     g_keyMapHandler.popKeyMap();
-    message("disable SKK");
+    set_mode_line_format(this.baseModeFmt);
   } else {
     this.enableSKK = true;
     g_keyMapHandler.pushKeyMap(this.getKeyMap());
-    message("enable SKK");
+    this.baseModeFmt = get_mode_line_format();
+    set_mode_line_format(`SKK-${this.modeDispName()}:  ${this.baseModeFmt}`)
   }
 }
 

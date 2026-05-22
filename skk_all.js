@@ -1,4 +1,4 @@
-let g_timestamp = "2026-05-22 17:53";
+let g_timestamp = "2026-05-23 08:48";
 
 print("SKK: " + g_timestamp);
 
@@ -201,6 +201,7 @@ function SKK(dictionary) {
   this.dictionary = dictionary;
   this.skkKeymap = null;
   this.enableSKK = false;
+  this.baseModeFmt = "";
   this.initializeState();
 }
 
@@ -319,13 +320,19 @@ SKK.prototype.processRoman = function (key, table, emitter) {
 
 SKK.prototype.modes = {};
 SKK.prototype.primaryModes = [];
-SKK.registerMode = function(modeName, mode) {
+SKK.prototype.modeNameMap = {};
+SKK.registerMode = function(modeName, dispName, mode) {
   SKK.registerImplicitMode(modeName, mode);
   SKK.prototype.primaryModes.push(modeName);
+  SKK.prototype.modeNameMap[modeName] = dispName;
 };
 SKK.registerImplicitMode = function(modeName, mode) {
   SKK.prototype.modes[modeName] = mode;
 };
+
+SKK.prototype.modeDispName = function() {
+  return this.modeNameMap[this.currentMode] || this.currentMode;
+}
 
 SKK.prototype.switchMode = function(newMode) {
   if (newMode == this.currentMode) {
@@ -339,6 +346,10 @@ SKK.prototype.switchMode = function(newMode) {
   var initHandler = this.modes[this.currentMode].initHandler;
   if (initHandler) {
     initHandler(this);
+  }
+
+  if (this.primaryModes.indexOf(newMode) >= 0) {
+    set_mode_line_format(`SKK-${this.modeDispName()}:  ${this.baseModeFmt}`)
   }
 };
 SKK.prototype.updateComposition = function() {
@@ -472,11 +483,12 @@ SKK.prototype.toggleEnableSKK = function() {
   if (this.enableSKK) {
     this.finishSKK();
     g_keyMapHandler.popKeyMap();
-    message("disable SKK");
+    set_mode_line_format(this.baseModeFmt);
   } else {
     this.enableSKK = true;
     g_keyMapHandler.pushKeyMap(this.getKeyMap());
-    message("enable SKK");
+    this.baseModeFmt = get_mode_line_format();
+    set_mode_line_format(`SKK-${this.modeDispName()}:  ${this.baseModeFmt}`)
   }
 }
 
@@ -681,13 +693,13 @@ function createRomanInput(table) {
   };
 }
 
-SKK.registerMode('hiragana', {
+SKK.registerMode('hiragana', "あ", {
   displayName: '\u3072\u3089\u304c\u306a',
   keyHandler: createRomanInput(romanTable),
   compositionHandler: updateComposition
 });
 
-SKK.registerMode('katakana', {
+SKK.registerMode('katakana', "ア", {
   displayName: '\u30ab\u30bf\u30ab\u30ca',
   keyHandler: createRomanInput(katakanaTable),
   compositionHandler: updateComposition
@@ -715,14 +727,14 @@ function createAsciiLikeMode(conv) {
   };
 }
 
-SKK.registerMode('ascii', {
+SKK.registerMode('ascii', "英数", {
   displayName: '\u82f1\u6570',
   keyHandler: createAsciiLikeMode(function(skk, keyStr) {
     return false;
   })
 });
 
-SKK.registerMode('full-ascii', {
+SKK.registerMode('full-ascii', "全英", {
   displayName: '\u5168\u82f1',
   keyHandler: createAsciiLikeMode(function(skk, keyStr) {
     if (keyStr == "Space") {

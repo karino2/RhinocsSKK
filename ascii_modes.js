@@ -19,14 +19,14 @@ function createAsciiLikeMode(conv) {
   };
 }
 
-SKK.registerMode('ascii', {
+SKK.registerMode('ascii', "英数", {
   displayName: '\u82f1\u6570',
   keyHandler: createAsciiLikeMode(function(skk, keyStr) {
     return false;
   })
 });
 
-SKK.registerMode('full-ascii', {
+SKK.registerMode('full-ascii', "全英", {
   displayName: '\u5168\u82f1',
   keyHandler: createAsciiLikeMode(function(skk, keyStr) {
     if (keyStr == "Space") {
