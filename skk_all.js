@@ -1,4 +1,4 @@
-let g_timestamp = "2026-05-22 00:37";
+let g_timestamp = "2026-05-22 17:53";
 
 print("SKK: " + g_timestamp);
 
@@ -468,18 +468,22 @@ SKK.prototype.finishSKK = function() {
   this.initializeState();
 }
 
-let g_skk = new SKK(new Dictionary());
-
-global_set_key(["C-x", "C-j"], () => {
-  if (g_skk.enableSKK) {
-    g_skk.finishSKK();
+SKK.prototype.toggleEnableSKK = function() {
+  if (this.enableSKK) {
+    this.finishSKK();
     g_keyMapHandler.popKeyMap();
     message("disable SKK");
   } else {
-    g_skk.enableSKK = true;
-    g_keyMapHandler.pushKeyMap(g_skk.getKeyMap());
+    this.enableSKK = true;
+    g_keyMapHandler.pushKeyMap(this.getKeyMap());
     message("enable SKK");
   }
+}
+
+let g_skk = new SKK(new Dictionary());
+
+global_set_key(["C-x", "C-j"], () => {
+  g_skk.toggleEnableSKK();
 });
 var romanTable = {
   a:'\u3042', i:'\u3044', u:'\u3046', e:'\u3048', o:'\u304a',

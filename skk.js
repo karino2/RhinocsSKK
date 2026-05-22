@@ -269,16 +269,20 @@ SKK.prototype.finishSKK = function() {
   this.initializeState();
 }
 
-let g_skk = new SKK(new Dictionary());
-
-global_set_key(["C-x", "C-j"], () => {
-  if (g_skk.enableSKK) {
-    g_skk.finishSKK();
+SKK.prototype.toggleEnableSKK = function() {
+  if (this.enableSKK) {
+    this.finishSKK();
     g_keyMapHandler.popKeyMap();
     message("disable SKK");
   } else {
-    g_skk.enableSKK = true;
-    g_keyMapHandler.pushKeyMap(g_skk.getKeyMap());
+    this.enableSKK = true;
+    g_keyMapHandler.pushKeyMap(this.getKeyMap());
     message("enable SKK");
   }
+}
+
+let g_skk = new SKK(new Dictionary());
+
+global_set_key(["C-x", "C-j"], () => {
+  g_skk.toggleEnableSKK();
 });
