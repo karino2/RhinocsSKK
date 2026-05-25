@@ -1,4 +1,4 @@
-let g_timestamp = "2026-05-23 08:48";
+let g_timestamp = "2026-05-26 08:26";
 
 print("SKK: " + g_timestamp);
 
@@ -380,20 +380,7 @@ SKK.prototype.queryUnknownWord = function() {
     label += '*' + this.okuriText;
   }
 
-  let new_word = query_text_dialog(label);
-  print("new_word: " + new_word);
-  if(new_word != "") {
-    print("not null");
-    this.recordNewResult({word:new_word});
-    this.commitText(new_word + this.okuriText);
-    this.roman = '';
-
-    this.entries = null;
-    this.preedit = '';
-    this.okuriText = '';
-    this.okuriPrefix = '';
-    this.switchMode('hiragana');
-  } else {
+  let onCancel = ()=> {
     print("null case, prevMode:" + this.previousMode);
     this.roman = '';
     if (this.previousMode != 'conversion') {
@@ -407,6 +394,26 @@ SKK.prototype.queryUnknownWord = function() {
     this.okuriPrefix = '';
     this.switchMode(this.previousMode);
   }
+
+  query_text_dialog(label).then(new_word=> {
+    print("new_word: " + new_word);
+    if(new_word != "") {
+      print("not null");
+      this.clearComposition();
+      this.recordNewResult({word:new_word});
+      this.commitText(new_word + this.okuriText);
+      this.roman = '';
+
+      this.entries = null;
+      this.preedit = '';
+      this.okuriText = '';
+      this.okuriPrefix = '';
+      this.switchMode('hiragana');
+    } else {
+      onCancel();
+    }
+  }).catch(onCancel);
+
 };
 
 
@@ -1006,8 +1013,12 @@ function kanaTurnOver(str) {
 (function() {
 
 function updateComposition(skk) {
+  // 辞書登録ダイアログ中
+  if (!skk.entries ||  skk.entries.index >= skk.entries.entries.length) {
+    return;
+  }
   var entry = skk.entries.entries[skk.entries.index];
-  if (!entry) {
+  if (!entry || (skk.entries.index >= skk.entries.entries.length)) {
     skk.clearComposition();
   }
 

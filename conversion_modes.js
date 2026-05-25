@@ -1,8 +1,12 @@
 (function() {
 
 function updateComposition(skk) {
+  // 辞書登録ダイアログ中
+  if (!skk.entries ||  skk.entries.index >= skk.entries.entries.length) {
+    return;
+  }
   var entry = skk.entries.entries[skk.entries.index];
-  if (!entry) {
+  if (!entry || (skk.entries.index >= skk.entries.entries.length)) {
     skk.clearComposition();
   }
 
