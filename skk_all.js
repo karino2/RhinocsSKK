@@ -1,4 +1,4 @@
-let g_timestamp = "2026-05-26 08:26";
+let g_timestamp = "2026-05-30 22:51";
 
 print("SKK: " + g_timestamp);
 
@@ -201,6 +201,7 @@ function SKK(dictionary) {
   this.dictionary = dictionary;
   this.skkKeymap = null;
   this.enableSKK = false;
+  this.isMiniBuffer = false;
   this.baseModeFmt = "";
   this.initializeState();
 }
@@ -224,6 +225,8 @@ SKK.prototype.commitText = function(text) {
   // print("commitText: text:" + text + " , creg:" + JSON.stringify(this.conversionRegion), " , point:" + point());
   insert(text);
 };
+
+
 SKK.prototype.setComposition = function(text, cursor, args) {
     // print("setComposition: text:" + text + " cursor:" + cursor + ", creg:" + JSON.stringify(this.conversionRegion));
 
@@ -504,6 +507,20 @@ let g_skk = new SKK(new Dictionary());
 global_set_key(["C-x", "C-j"], () => {
   g_skk.toggleEnableSKK();
 });
+
+let g_miniSkk = new SKK(g_skk.dictionary);
+g_miniSkk.isMiniBuffer = true;
+
+global_mini_set_key(["C-x", "C-j"], () => {
+  g_miniSkk.toggleEnableSKK();
+  function exitHook(){
+    g_miniSkk.finishSKK();
+    g_hooks.removeHook("exit_minibuffer_hook", exitHook);
+  }
+  g_hooks.addHook("exit_minibuffer_hook", exitHook);
+});
+
+
 var romanTable = {
   a:'\u3042', i:'\u3044', u:'\u3046', e:'\u3048', o:'\u304a',
   xa:'\u3041', xi:'\u3043', xu:'\u3045', xe:'\u3047', xo:'\u3049',
@@ -721,9 +738,9 @@ function createAsciiLikeMode(conv) {
       return true;
     }
 
+    // 外の'Return'の処理に任せる。改行を入れるかminibufferの確定か。
     if (keyStr == 'Return') {
-      skk.commitText('\n');
-      return true;
+      return false;
     }
 
     if (keyStr.length > 1) {

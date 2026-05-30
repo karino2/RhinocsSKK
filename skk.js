@@ -2,6 +2,7 @@ function SKK(dictionary) {
   this.dictionary = dictionary;
   this.skkKeymap = null;
   this.enableSKK = false;
+  this.isMiniBuffer = false;
   this.baseModeFmt = "";
   this.initializeState();
 }
@@ -25,6 +26,8 @@ SKK.prototype.commitText = function(text) {
   // print("commitText: text:" + text + " , creg:" + JSON.stringify(this.conversionRegion), " , point:" + point());
   insert(text);
 };
+
+
 SKK.prototype.setComposition = function(text, cursor, args) {
     // print("setComposition: text:" + text + " cursor:" + cursor + ", creg:" + JSON.stringify(this.conversionRegion));
 
@@ -305,3 +308,16 @@ let g_skk = new SKK(new Dictionary());
 global_set_key(["C-x", "C-j"], () => {
   g_skk.toggleEnableSKK();
 });
+
+let g_miniSkk = new SKK(g_skk.dictionary);
+g_miniSkk.isMiniBuffer = true;
+
+global_mini_set_key(["C-x", "C-j"], () => {
+  g_miniSkk.toggleEnableSKK();
+  function exitHook(){
+    g_miniSkk.finishSKK();
+    g_hooks.removeHook("exit_minibuffer_hook", exitHook);
+  }
+  g_hooks.addHook("exit_minibuffer_hook", exitHook);
+});
+

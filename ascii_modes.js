@@ -6,9 +6,9 @@ function createAsciiLikeMode(conv) {
       return true;
     }
 
+    // 外の'Return'の処理に任せる。改行を入れるかminibufferの確定か。
     if (keyStr == 'Return') {
-      skk.commitText('\n');
-      return true;
+      return false;
     }
 
     if (keyStr.length > 1) {
