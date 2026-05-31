@@ -1,4 +1,4 @@
-let g_timestamp = "2026-05-30 22:51";
+let g_timestamp = "2026-05-31 18:32";
 
 print("SKK: " + g_timestamp);
 
@@ -552,6 +552,12 @@ var romanTable = {
   '!': '\uff01', // ！
   '?': '\uff1f', // ？
 
+  // とりあえず自分が使う全角だけ対応
+  '=': '\uff1d', // ＝
+  '<': '\uff1c', // ＜
+  '>': '\uff1e', // ＞
+  '|': '\uff5c', // ｜
+
   // The following rule comes from https://github.com/skk-dev/ddskk/blob/8c47f46e38a29a0f3eabcd524268d20573102467/docs/06_apps.rst?plain=1#L2100-L2137
   'z ': '\u3000', // 全角スペース
   'z0': '\u25cb', // ○
@@ -604,10 +610,11 @@ function initRomanTable() {
   addYouon('c', 'h', romanTable['ti']);
   addYouon('j', '',  romanTable['zi']);
 
-  // special case: shi==si, chi==ti, ji=zi
+  // special case: shi==si, chi==ti, ji=zi, cya==cha
   romanTable['shi'] = romanTable['si'];
   romanTable['chi'] = romanTable['ti'];
   romanTable['ji'] = romanTable['zi'];
+  romanTable['cya'] = romanTable['cha'];
 
   for (var key in romanTable) {
     var hiragana = romanTable[key];
