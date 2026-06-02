@@ -305,19 +305,19 @@ SKK.prototype.toggleEnableSKK = function() {
 
 let g_skk = new SKK(new Dictionary());
 
-global_set_key(["C-x", "C-j"], () => {
-  g_skk.toggleEnableSKK();
-});
-
 let g_miniSkk = new SKK(g_skk.dictionary);
 g_miniSkk.isMiniBuffer = true;
 
-global_mini_set_key(["C-x", "C-j"], () => {
+
+function toggleSKK() {
+  g_skk.toggleEnableSKK();
+}
+
+function toggleMiniBufferSKK() {
   g_miniSkk.toggleEnableSKK();
   function exitHook(){
     g_miniSkk.finishSKK();
     g_hooks.removeHook("exit_minibuffer_hook", exitHook);
   }
   g_hooks.addHook("exit_minibuffer_hook", exitHook);
-});
-
+}
