@@ -2,11 +2,7 @@ function SKK(dictionary) {
   this.dictionary = dictionary;
   this.skkKeymap = null;
   this.enableSKK = false;
-  this.isMiniBuffer = false;
   this.baseModeFmt = "";
-  // 基本的にはbaseModeFmtと同じだが、ミニバッファでSKKを有効にしたときはbaseModeFmtをg_skkのものにするので、
-  // 元のモードラインフォーマットと異なる事になる。その場合のために元のモードラインフォーマットを保存しておく。
-  this.originalModeFmt = "";
   this.initializeState();
 }
 
@@ -296,44 +292,20 @@ SKK.prototype.finishSKK = function() {
 SKK.prototype.toggleEnableSKK = function() {
   if (this.enableSKK) {
     this.finishSKK();
-    g_keyMapHandler.popKeyMap();
-    set_mode_line_format(this.originalModeFmt);
+    g_keyMapHandler.popMainKeyMap();
+    g_keyMapHandler.popMiniKeyMap();
+    set_mode_line_format(this.baseModeFmt);
   } else {
     this.enableSKK = true;
-    g_keyMapHandler.pushKeyMap(this.getKeyMap());
-    this.originalModeFmt = get_mode_line_format();
-    if (!is_minibuffer()) {
-      // ミニバッファの場合はg_skkのbaseModeFmtを使ったりするので外でセットする。
-      this.baseModeFmt = this.originalModeFmt;
-      set_mode_line_format(`SKK-${this.modeDispName()}:  ${this.baseModeFmt}`)
-    }
+    g_keyMapHandler.pushMainKeyMap(this.getKeyMap());
+    g_keyMapHandler.pushMiniKeyMap(this.getKeyMap());
+    this.baseModeFmt = get_mode_line_format();
+    set_mode_line_format(`SKK-${this.modeDispName()}:  ${this.baseModeFmt}`)
   }
 }
 
 let g_skk = new SKK(new Dictionary());
 
-let g_miniSkk = new SKK(g_skk.dictionary);
-g_miniSkk.isMiniBuffer = true;
-
-
 function toggleSKK() {
   g_skk.toggleEnableSKK();
-}
-
-function toggleMiniBufferSKK() {
-  g_miniSkk.toggleEnableSKK();
-  if (g_miniSkk.enableSKK) {
-    if(g_skk.enableSKK){
-      g_miniSkk.baseModeFmt = g_skk.baseModeFmt;
-    } else {
-      g_miniSkk.baseModeFmt = g_miniSkk.originalModeFmt;
-    }
-    set_mode_line_format(`SKK-${g_miniSkk.modeDispName()}:  ${g_miniSkk.baseModeFmt}`)
-  }
-  function exitHook(){
-    g_miniSkk.finishSKK();
-    set_mode_line_format(g_miniSkk.originalModeFmt);
-    g_hooks.removeHook("exit_minibuffer_hook", exitHook);
-  }
-  g_hooks.addHook("exit_minibuffer_hook", exitHook);
 }
