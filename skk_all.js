@@ -1,4 +1,4 @@
-let g_timestamp = "2026-06-04 14:30";
+let g_timestamp = "2026-06-05 09:26";
 
 print("SKK: " + g_timestamp);
 
@@ -113,7 +113,7 @@ Dictionary.prototype.initSystemDictionary = function() {
 Dictionary.prototype.initUserDictionary = function() {
   let userDictPath = join_path(get_per_device_storage(), "/skk/userdict.json");
   let content = read_file(userDictPath);
-  if (content) {
+  if (content && content.length > 0) {
     this.userDict = JSON.parse(content);
   }
 };

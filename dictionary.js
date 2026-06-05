@@ -109,7 +109,7 @@ Dictionary.prototype.initSystemDictionary = function() {
 Dictionary.prototype.initUserDictionary = function() {
   let userDictPath = join_path(get_per_device_storage(), "/skk/userdict.json");
   let content = read_file(userDictPath);
-  if (content) {
+  if (content && content.length > 0) {
     this.userDict = JSON.parse(content);
   }
 };
