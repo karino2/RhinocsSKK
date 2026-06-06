@@ -1,4 +1,4 @@
-let g_timestamp = "2026-06-05 09:26";
+let g_timestamp = "2026-06-06 12:01";
 
 print("SKK: " + g_timestamp);
 
@@ -602,6 +602,8 @@ function initRomanTable() {
   romanTable['chi'] = romanTable['ti'];
   romanTable['ji'] = romanTable['zi'];
   romanTable['cya'] = romanTable['cha'];
+  romanTable['cyu'] = romanTable['chu'];
+  romanTable['cyo'] = romanTable['cho'];
 
   for (var key in romanTable) {
     var hiragana = romanTable[key];

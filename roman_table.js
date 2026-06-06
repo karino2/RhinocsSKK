@@ -92,6 +92,8 @@ function initRomanTable() {
   romanTable['chi'] = romanTable['ti'];
   romanTable['ji'] = romanTable['zi'];
   romanTable['cya'] = romanTable['cha'];
+  romanTable['cyu'] = romanTable['chu'];
+  romanTable['cyo'] = romanTable['cho'];
 
   for (var key in romanTable) {
     var hiragana = romanTable[key];
