@@ -1,4 +1,4 @@
-let g_timestamp = "2026-06-06 12:01";
+let g_timestamp = "2026-06-10 21:49";
 
 print("SKK: " + g_timestamp);
 
@@ -544,6 +544,7 @@ var romanTable = {
   '<': '\uff1c', // ＜
   '>': '\uff1e', // ＞
   '|': '\uff5c', // ｜
+  '~': '\u301c', // 〜
 
   // The following rule comes from https://github.com/skk-dev/ddskk/blob/8c47f46e38a29a0f3eabcd524268d20573102467/docs/06_apps.rst?plain=1#L2100-L2137
   'z ': '\u3000', // 全角スペース
