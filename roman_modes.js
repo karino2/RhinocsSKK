@@ -21,7 +21,7 @@ function createRomanInput(table) {
       return false;
     }
 
-    if ((keyStr == 'Delete' || keyStr == "C-d") && skk.roman.length > 0) {
+    if ((keyStr == 'Backspace' || keyStr == "C-h") && skk.roman.length > 0) {
       skk.roman = skk.roman.slice(0, skk.roman.length - 1);
       return true;
     }

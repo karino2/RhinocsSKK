@@ -1,4 +1,4 @@
-let g_timestamp = "2026-06-10 21:49";
+let g_timestamp = "2026-06-14 09:38";
 
 print("SKK: " + g_timestamp);
 
@@ -647,7 +647,7 @@ function createRomanInput(table) {
       return false;
     }
 
-    if ((keyStr == 'Delete' || keyStr == "C-d") && skk.roman.length > 0) {
+    if ((keyStr == 'Backspace' || keyStr == "C-h") && skk.roman.length > 0) {
       skk.roman = skk.roman.slice(0, skk.roman.length - 1);
       return true;
     }
@@ -953,7 +953,7 @@ function okuriPreeditInput(skk, keyStr) {
     return true;
   }
 
-  if (keyStr == 'Backspace') {
+  if (keyStr == 'Backspace' || keyStr == "C-h") {
     skk.roman = skk.roman.slice(0, skk.roman.length - 1);
     if (skk.roman.length == 0) {
       skk.okuriPrefix = '';

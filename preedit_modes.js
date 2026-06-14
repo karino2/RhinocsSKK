@@ -175,7 +175,7 @@ function okuriPreeditInput(skk, keyStr) {
     return true;
   }
 
-  if (keyStr == 'Backspace') {
+  if (keyStr == 'Backspace' || keyStr == "C-h") {
     skk.roman = skk.roman.slice(0, skk.roman.length - 1);
     if (skk.roman.length == 0) {
       skk.okuriPrefix = '';
