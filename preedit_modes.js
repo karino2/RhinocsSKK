@@ -28,6 +28,9 @@ function preeditKeybind(skk, keyStr) {
     return true;
   }
 
+  // キャレットの移動は確定時のChromeOSの振る舞いとRhinocsの振る舞いの違いでつじつまを合わすのが難しいので、
+  // そもそもキャレット移動はサポートしない事にする。
+  /*
   if (keyStr == 'Left' || keyStr == 'C-b') {
     if (skk.caret > 0) {
       skk.caret--;
@@ -41,6 +44,7 @@ function preeditKeybind(skk, keyStr) {
     }
     return true;
   }
+  */
 
   if (keyStr == 'Backspace' || keyStr == 'C-h') {
     if (skk.roman.length > 0) {
@@ -102,7 +106,10 @@ function preeditInput(skk, keyStr) {
 
   if (keyStr.length != 1) {
     // special keys -- ignore for now
-    return false;
+    // return false;
+
+    // C-d, C-k, C-nなどは動くと困るので、ここで握りつぶすためtrueを返す。
+    return true;
   }
 
   if (skk.preedit.length > 0 &&
