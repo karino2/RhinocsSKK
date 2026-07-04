@@ -1,1 +1,1 @@
-print("SKK: " + g_timestamp);
+console.log("SKK: " + g_timestamp);

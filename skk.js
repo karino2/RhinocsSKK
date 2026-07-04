@@ -22,13 +22,13 @@ SKK.prototype.initializeState = function() {
 };
 
 SKK.prototype.commitText = function(text) {
-  // print("commitText: text:" + text + " , creg:" + JSON.stringify(this.conversionRegion), " , point:" + point());
+  // console.log("commitText: text:" + text + " , creg:" + JSON.stringify(this.conversionRegion), " , point:" + point());
   insert(text);
 };
 
 
 SKK.prototype.setComposition = function(text, cursor, args) {
-    // print("setComposition: text:" + text + " cursor:" + cursor + ", creg:" + JSON.stringify(this.conversionRegion));
+    // console.log("setComposition: text:" + text + " cursor:" + cursor + ", creg:" + JSON.stringify(this.conversionRegion));
 
     if (this.conversionRegion) {
         let [start, end] = this.conversionRegion;
@@ -40,7 +40,7 @@ SKK.prototype.setComposition = function(text, cursor, args) {
 
 };
 SKK.prototype.clearComposition = function() {
-    // print("clearing composition");
+    // console.log("clearing composition");
     if (this.conversionRegion) {
         let [start, end] = this.conversionRegion;
         delete_region(start, end);
@@ -49,7 +49,7 @@ SKK.prototype.clearComposition = function() {
 };
 
 SKK.prototype.updateCandidates = function() {
-    //print("update candidates");
+    //console.log("update candidates");
 
     if (!this.entries || this.entries.index <= 2) {
       message("");
@@ -184,7 +184,7 @@ SKK.prototype.queryUnknownWord = function() {
   }
 
   let onCancel = ()=> {
-    print("null case, prevMode:" + this.previousMode);
+    console.log("null case, prevMode:" + this.previousMode);
     this.roman = '';
     if (this.previousMode != 'conversion') {
       this.entries = null;
@@ -199,9 +199,9 @@ SKK.prototype.queryUnknownWord = function() {
   }
 
   query_text_dialog(label).then(new_word=> {
-    print("new_word: " + new_word);
+    console.log("new_word: " + new_word);
     if(new_word != "") {
-      print("not null");
+      console.log("not null");
       this.clearComposition();
       this.recordNewResult({word:new_word});
       this.commitText(new_word + this.okuriText);
