@@ -37,12 +37,43 @@ function initConversion(skk) {
       };
       updateComposition(skk);
     } else {
-      skk.queryUnknownWord();
+      skk.queryUnknownWord(()=>{
+        // onCancel
+        // console.log("onCancel, prevMode:" + skk.previousMode + ", curr: " + skk.currentMode);
+        skk.roman = '';
+        skk.entries = null;
+        if (skk.previousMode == 'okuri-preedit') {
+          skk.preedit += skk.okuriText;
+          skk.previousMode = 'preedit';
+        }
+        skk.okuriText = '';
+        skk.okuriPrefix = '';
+        skk.switchMode(skk.previousMode);
+      });
     }
   });
 }
 
 function conversionMode(skk, keyStr) {
+  function revertToPreEdit() {
+    skk.entries = null;
+    skk.preedit += skk.okuriText;
+    skk.okuriText = '';
+    skk.okuriPrefix = '';
+    skk.switchMode('preedit');
+  }
+
+  function backToPrevCand() {
+    if (skk.entries.index > 9) {
+      skk.entries.index -= 7;
+    } else {
+      skk.entries.index--;
+    }
+    if (skk.entries.index < 0) {
+      revertToPreEdit();
+    }
+  }
+
   if (keyStr == 'Space') {
     if (skk.entries.index > 2) {
       skk.entries.index += 7;
@@ -51,21 +82,10 @@ function conversionMode(skk, keyStr) {
     }
 
     if (skk.entries.index >= skk.entries.entries.length) {
-      skk.queryUnknownWord();
+      skk.queryUnknownWord(backToPrevCand);
     }
   } else if (keyStr == 'x') {
-    if (skk.entries.index > 9) {
-      skk.entries.index -= 7;
-    } else {
-      skk.entries.index--;
-    }
-    if (skk.entries.index < 0) {
-      skk.entries = null;
-      skk.preedit += skk.okuriText;
-      skk.okuriText = '';
-      skk.okuriPrefix = '';
-      skk.switchMode('preedit');
-    }
+    backToPrevCand();
   } else if (keyStr == 'Escape' ||
              keyStr == 'C-g') {
     skk.entries = null;

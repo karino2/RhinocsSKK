@@ -1,4 +1,4 @@
-let g_timestamp = "2026-07-04 18:39";
+let g_timestamp = "2026-07-17 19:57";
 
 console.log("SKK: " + g_timestamp);
 
@@ -375,26 +375,11 @@ SKK.prototype.handleKeyEvent = function(keyevent) {
   return consumed;
 };
 
-SKK.prototype.queryUnknownWord = function() {
+SKK.prototype.queryUnknownWord = function(onCancel) {
   // Show ▼ followed by the input text, * and the okuri text
   var label = '\u25bc' + this.preedit;
   if (this.okuriText.length > 0) {
     label += '*' + this.okuriText;
-  }
-
-  let onCancel = ()=> {
-    console.log("null case, prevMode:" + this.previousMode);
-    this.roman = '';
-    if (this.previousMode != 'conversion') {
-      this.entries = null;
-    }
-    if (this.previousMode == 'okuri-preedit') {
-      this.preedit += this.okuriText;
-      this.previousMode = 'preedit';
-    }
-    this.okuriText = '';
-    this.okuriPrefix = '';
-    this.switchMode(this.previousMode);
   }
 
   query_text_dialog(label).then(new_word=> {
@@ -1070,12 +1055,43 @@ function initConversion(skk) {
       };
       updateComposition(skk);
     } else {
-      skk.queryUnknownWord();
+      skk.queryUnknownWord(()=>{
+        // onCancel
+        // console.log("onCancel, prevMode:" + skk.previousMode + ", curr: " + skk.currentMode);
+        skk.roman = '';
+        skk.entries = null;
+        if (skk.previousMode == 'okuri-preedit') {
+          skk.preedit += skk.okuriText;
+          skk.previousMode = 'preedit';
+        }
+        skk.okuriText = '';
+        skk.okuriPrefix = '';
+        skk.switchMode(skk.previousMode);
+      });
     }
   });
 }
 
 function conversionMode(skk, keyStr) {
+  function revertToPreEdit() {
+    skk.entries = null;
+    skk.preedit += skk.okuriText;
+    skk.okuriText = '';
+    skk.okuriPrefix = '';
+    skk.switchMode('preedit');
+  }
+
+  function backToPrevCand() {
+    if (skk.entries.index > 9) {
+      skk.entries.index -= 7;
+    } else {
+      skk.entries.index--;
+    }
+    if (skk.entries.index < 0) {
+      revertToPreEdit();
+    }
+  }
+
   if (keyStr == 'Space') {
     if (skk.entries.index > 2) {
       skk.entries.index += 7;
@@ -1084,21 +1100,10 @@ function conversionMode(skk, keyStr) {
     }
 
     if (skk.entries.index >= skk.entries.entries.length) {
-      skk.queryUnknownWord();
+      skk.queryUnknownWord(backToPrevCand);
     }
   } else if (keyStr == 'x') {
-    if (skk.entries.index > 9) {
-      skk.entries.index -= 7;
-    } else {
-      skk.entries.index--;
-    }
-    if (skk.entries.index < 0) {
-      skk.entries = null;
-      skk.preedit += skk.okuriText;
-      skk.okuriText = '';
-      skk.okuriPrefix = '';
-      skk.switchMode('preedit');
-    }
+    backToPrevCand();
   } else if (keyStr == 'Escape' ||
              keyStr == 'C-g') {
     skk.entries = null;

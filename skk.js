@@ -176,26 +176,11 @@ SKK.prototype.handleKeyEvent = function(keyevent) {
   return consumed;
 };
 
-SKK.prototype.queryUnknownWord = function() {
+SKK.prototype.queryUnknownWord = function(onCancel) {
   // Show ▼ followed by the input text, * and the okuri text
   var label = '\u25bc' + this.preedit;
   if (this.okuriText.length > 0) {
     label += '*' + this.okuriText;
-  }
-
-  let onCancel = ()=> {
-    console.log("null case, prevMode:" + this.previousMode);
-    this.roman = '';
-    if (this.previousMode != 'conversion') {
-      this.entries = null;
-    }
-    if (this.previousMode == 'okuri-preedit') {
-      this.preedit += this.okuriText;
-      this.previousMode = 'preedit';
-    }
-    this.okuriText = '';
-    this.okuriPrefix = '';
-    this.switchMode(this.previousMode);
   }
 
   query_text_dialog(label).then(new_word=> {
